@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=VieShareURL Scheme Handler
+NoDisplay=true
+MimeType=x-scheme-handler/vieshare;
+TryExec=vieshare
+Exec=vieshare %u
+Icon=vieshare
+Terminal=false
+Type=Application
+StartupNotify=false
+StartupWMClass=vieshare

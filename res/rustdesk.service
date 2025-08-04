@@ -1,0 +1,21 @@
+[Unit]
+Description=VieShare
+Requires=network.target
+After=systemd-user-sessions.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/vieshare --service
+# kill --tray and --server both
+ExecStop=pkill -f "vieshare --"
+# below two lines do not work, have to use above one line
+#ExecStop=pkill -f "vieshare --tray"
+#ExecStop=pkill -f "vieshare --server"
+PIDFile=/run/vieshare.pid
+KillMode=mixed
+TimeoutStopSec=30
+User=root
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target
