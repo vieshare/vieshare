@@ -19,6 +19,7 @@
 // https://slhck.info/video/2017/03/01/rate-control.html
 
 use super::{display_service::check_display_changed, service::ServiceTmpl, video_qos::VideoQoS, *};
+use crate::gaming_optimizer::{get_gaming_settings, is_gaming_active};
 #[cfg(target_os = "linux")]
 use crate::common::SimpleCallOnReturn;
 #[cfg(target_os = "linux")]
@@ -114,7 +115,19 @@ impl VideoFrameController {
             return;
         }
 
-        let timeout_dur = Duration::from_millis(timeout_millis as u64);
+        // Use immediate mode for gaming to reduce latency
+        let actual_timeout = if is_gaming_active() {
+            let gaming_settings = get_gaming_settings();
+            if gaming_settings.immediate_frame {
+                10 // Very short timeout for immediate response
+            } else {
+                timeout_millis.min(100) // Reduced timeout for gaming
+            }
+        } else {
+            timeout_millis
+        };
+
+        let timeout_dur = Duration::from_millis(actual_timeout);
         match tokio::time::timeout(timeout_dur, FRAME_FETCHED_NOTIFIER.1.lock().await.recv()).await
         {
             Err(_) => {

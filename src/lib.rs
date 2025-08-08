@@ -1,6 +1,8 @@
 mod keyboard;
 /// cbindgen:ignore
 pub mod platform;
+mod gaming_optimizer;
+mod gaming_config;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub use platform::{
     get_cursor, get_cursor_data, get_cursor_pos, get_focused_display, start_os_service,

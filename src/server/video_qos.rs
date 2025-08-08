@@ -4,6 +4,7 @@ use std::{
     collections::VecDeque,
     time::{Duration, Instant},
 };
+use crate::gaming_optimizer::{get_gaming_settings, is_gaming_active};
 
 /*
 FPS adjust:
@@ -135,9 +136,20 @@ impl VideoQoS {
         Duration::from_secs_f32(1. / (self.fps() as f32))
     }
 
-    // Get current FPS within valid range
+    // Get current FPS within valid range, with gaming optimizations
     pub fn fps(&self) -> u32 {
-        let fps = self.fps;
+        let mut fps = self.fps;
+        
+        // Apply gaming optimizations if active
+        if is_gaming_active() {
+            let gaming_settings = get_gaming_settings();
+            // Use gaming target FPS if higher than current
+            if gaming_settings.fps > fps && gaming_settings.low_latency_mode {
+                fps = gaming_settings.fps;
+                log::debug!("Gaming mode: boosted FPS to {}", fps);
+            }
+        }
+        
         if fps >= MIN_FPS && fps <= MAX_FPS {
             fps
         } else {
@@ -155,12 +167,26 @@ impl VideoQoS {
         self.bitrate_store
     }
 
-    // Get current bitrate ratio with bounds checking
+    // Get current bitrate ratio with bounds checking and gaming optimizations
     pub fn ratio(&mut self) -> f32 {
-        if self.ratio < BR_MIN_HIGH_RESOLUTION || self.ratio > BR_MAX {
-            self.ratio = BR_BALANCED;
+        let mut ratio = self.ratio;
+        
+        // Apply gaming optimizations if active
+        if is_gaming_active() {
+            let gaming_settings = get_gaming_settings();
+            if gaming_settings.low_latency_mode {
+                // Boost bitrate for gaming to improve quality
+                ratio *= gaming_settings.bitrate_multiplier;
+                log::debug!("Gaming mode: boosted bitrate ratio to {:.2}", ratio);
+            }
         }
-        self.ratio
+        
+        if ratio < BR_MIN_HIGH_RESOLUTION || ratio > BR_MAX {
+            ratio = BR_BALANCED;
+        }
+        
+        self.ratio = ratio;
+        ratio
     }
 
     // Check if any user is in recording mode

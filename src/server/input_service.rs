@@ -12,6 +12,7 @@ use hbb_common::{
     message_proto::{pointer_device_event::Union::TouchEvent, touch_event::Union::ScaleUpdate},
     protobuf::EnumOrUnknown,
 };
+use crate::gaming_optimizer::on_input_event;
 use rdev::{self, EventType, Key as RdevKey, KeyCode, RawKey};
 #[cfg(target_os = "macos")]
 use rdev::{CGEventSourceStateID, CGEventTapLocation, VirtualInput};
@@ -700,6 +701,9 @@ fn get_modifier_state(key: Key, en: &mut Enigo) -> bool {
 }
 
 pub fn handle_mouse(evt: &MouseEvent, conn: i32) {
+    // Notify gaming optimizer of input activity
+    on_input_event();
+    
     #[cfg(target_os = "macos")]
     {
         // having GUI (--server has tray, it is GUI too), run main GUI thread, otherwise crash
@@ -1186,18 +1190,24 @@ pub async fn lock_screen() {
 #[inline]
 #[cfg(target_os = "linux")]
 pub fn handle_key(evt: &KeyEvent) {
+    // Notify gaming optimizer of input activity
+    on_input_event();
     handle_key_(evt);
 }
 
 #[inline]
 #[cfg(target_os = "windows")]
 pub fn handle_key(evt: &KeyEvent) {
+    // Notify gaming optimizer of input activity
+    on_input_event();
     crate::portable_service::client::handle_key(evt);
 }
 
 #[inline]
 #[cfg(target_os = "macos")]
 pub fn handle_key(evt: &KeyEvent) {
+    // Notify gaming optimizer of input activity
+    on_input_event();
     // having GUI, run main GUI thread, otherwise crash
     let evt = evt.clone();
     QUEUE.exec_async(move || handle_key_(&evt));

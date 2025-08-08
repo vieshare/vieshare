@@ -113,6 +113,10 @@ pub fn global_init() -> bool {
             crate::server::wayland::init();
         }
     }
+    
+    // Initialize gaming optimizations
+    crate::gaming_config::load_gaming_config();
+    
     true
 }
 
