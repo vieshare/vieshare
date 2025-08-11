@@ -1,0 +1,19 @@
+[Desktop Entry]
+Name=VieShare
+GenericName=Remote Desktop
+Comment=Remote Desktop
+Exec=vieshare %u
+Icon=vieshare
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Network;RemoteAccess;GTK;
+Keywords=internet;
+Actions=new-window;
+StartupWMClass=vieshare
+
+X-Desktop-File-Install-Version=0.23
+
+[Desktop Action new-window]
+Name=Open a New Window
+Exec=vieshare %u

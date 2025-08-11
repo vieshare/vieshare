@@ -1,0 +1,47 @@
+# arg 1:  the new package version
+#pre_install() {
+#}
+
+# arg 1:  the new package version
+post_install() {
+	# do something here
+	cp /usr/share/vieshare/files/vieshare.service /etc/systemd/system/vieshare.service
+	cp /usr/share/vieshare/files/vieshare.desktop /usr/share/applications/
+	cp /usr/share/vieshare/files/vieshare-link.desktop /usr/share/applications/
+	systemctl daemon-reload
+	systemctl enable vieshare
+	systemctl start vieshare
+	update-desktop-database
+}
+
+# arg 1:  the new package version
+# arg 2:  the old package version
+pre_upgrade() {
+    systemctl stop vieshare || true
+}
+
+# arg 1:  the new package version
+# arg 2:  the old package version
+post_upgrade() {
+	cp /usr/share/vieshare/files/vieshare.service /etc/systemd/system/vieshare.service
+	cp /usr/share/vieshare/files/vieshare.desktop /usr/share/applications/
+	cp /usr/share/vieshare/files/vieshare-link.desktop /usr/share/applications/
+	systemctl daemon-reload
+	systemctl enable vieshare
+	systemctl start vieshare
+	update-desktop-database
+}
+
+# arg 1:  the old package version
+pre_remove() {
+	systemctl stop vieshare || true
+	systemctl disable vieshare || true
+	rm /etc/systemd/system/vieshare.service || true
+}
+
+# arg 1:  the old package version
+post_remove() {
+	rm /usr/share/applications/vieshare.desktop || true
+	rm /usr/share/applications/vieshare-link.desktop || true
+	update-desktop-database
+}

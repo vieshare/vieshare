@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+if [ "$1" = configure ]; then
+
+	INITSYS=$(ls -al /proc/1/exe | awk -F' ' '{print $NF}' | awk -F'/' '{print $NF}')
+	ln -f -s /usr/share/vieshare/vieshare /usr/bin/vieshare
+	
+	if [ "systemd" == "$INITSYS" ]; then
+
+		if [ -e /etc/systemd/system/vieshare.service ]; then
+			rm /etc/systemd/system/vieshare.service /usr/lib/systemd/system/vieshare.service /usr/lib/systemd/user/vieshare.service >/dev/null  2>&1
+		fi
+		version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+		parsedVersion=$(echo "${version//./}")
+        mkdir -p /usr/lib/systemd/system/
+		cp /usr/share/vieshare/files/systemd/vieshare.service /usr/lib/systemd/system/vieshare.service
+		# try fix error in Ubuntu 18.04
+		# Failed to reload vieshare.service: Unit vieshare.service is not loaded properly: Exec format error.
+		# /usr/lib/systemd/system/vieshare.service:10: Executable path is not absolute: pkill -f "vieshare --"
+		if [ -e /usr/bin/pkill ]; then
+			sed -i "s|pkill|/usr/bin/pkill|g" /usr/lib/systemd/system/vieshare.service
+		fi
+		systemctl daemon-reload
+		systemctl enable vieshare
+		systemctl start vieshare
+	fi
+fi
